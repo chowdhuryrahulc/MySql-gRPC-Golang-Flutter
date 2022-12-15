@@ -39,14 +39,46 @@ func main() {
     defer db.Close()
 
 	// perform a db.Query insert
-    //* Image also added
-    insert, err := db.Query("INSERT INTO vocabulary VALUES ( 2, 'Otranaya', 'russia', true, LOAD_FILE('D:/Cdownloads/Flag_of_France.png') )")
+    // insert, err := db.Query("INSERT INTO vocabulary VALUES ( 2, 'Sinigalia', 'italy', true, LOAD_FILE('D:/Cdownloads/Flag_of_France.png') )")
+
+    // Get all values
+    getValues, err := db.Query("SELECT * FROM vocabulary")
 
 	 // if there is an error inserting, handle it
 	 if err != nil {
         panic(err.Error())
     }
 
+    // the result object has a method called Next,
+    // which is used to iterate through all returned rows.
+    for getValues.Next() {
+         
+        var id int
+        var term string
+        var defination string
+        var favorite bool
+        var image []byte
+         
+        // The result object provided Scan  method
+        // to read row data, Scan returns error,
+        // if any. Here we read id and name returned.
+        err = getValues.Scan(&id, &term, &defination, &favorite, &image)
+        //// get.Scan(&id, &name)
+         
+        // handle error
+        if err != nil {
+            panic(err)
+        }
+
+        fmt.Print(id)
+        fmt.Print(term)
+        fmt.Print(defination)
+        fmt.Println(favorite)
+        fmt.Println(image)
+    }
+
+    fmt.Println(getValues)
+
     // be careful deferring Queries if you are using transactions
-    defer insert.Close()
+    defer getValues.Close()
 }
