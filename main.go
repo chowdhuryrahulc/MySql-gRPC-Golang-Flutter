@@ -66,7 +66,7 @@ func (s *Server) GetData(ctx context.Context, paginate *proto.Paginate) (*proto.
 	x := getSqlData()
 	fmt.Println("getdata2")
 	fmt.Println(x)
-	return &proto.Vocab{Word: x}, nil 	//! its not Word.Vocab
+	return &proto.Vocab{Word: x}, nil 
 
 // 	//todo How do we change []MySqlData to []Word.
 // 	//todo Means os generted to grpc generated
@@ -96,7 +96,7 @@ func main() {
 	grpcServer := grpc.NewServer()
 	grpcLog.Info("Starting server at port :8080")
 	proto.RegisterBroadcastServer(grpcServer, server)
-	// This server error is due to the server methord
+	//! Error Solved: server error (here) is generally due to the server methords
 
 	// Start the server.
 	listener, err := net.Listen("tcp", ":8080")
