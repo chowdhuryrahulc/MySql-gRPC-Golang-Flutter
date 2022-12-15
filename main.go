@@ -19,7 +19,11 @@ import (
 )
 
 /*
-
+! ERROR: check if data is reaching to grocfront-end
+! i think the methord is not getting called, otherwise we would have get a print response
+! probably we need a pagination methord toarive from client side
+! or make something like CreteStream in TensorFlutterDocker side which can get called automatically
+todo check how they did that
  */
 
 var grpcLog glog.LoggerV2
