@@ -62,7 +62,7 @@ type Server struct {
 func (s *Server) GetData(ctx context.Context, paginate *proto.Paginate) (*proto.Vocab, error) {
 	//! ERROR SOLVED: context is required, otherwise below in registerBroadcastServer will give an error
 	//    var x []MySqlData
-	fmt.Println("getdata1")				//! not downloading
+	fmt.Println("getdata1")				//? When flutter is called, this is working (it is printing)
 	x := getSqlData()
 	fmt.Println("getdata2")
 	fmt.Println(x)
@@ -89,7 +89,7 @@ func main() {
 	// fmt.Println("goexeo")
 	// fmt.Println("x value", x)
 
-	//! uncomment below all
+	//// uncomment below all
 	var mySqlData []*proto.Word
 	server := &Server{mySqlData, proto.UnimplementedBroadcastServer{}} //! Why did we write unimplement...?
 

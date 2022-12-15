@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'dart:developer';
+
 import 'package:grpc/grpc.dart';
 import '../gen/services.pbgrpc.dart';
 
@@ -19,8 +21,9 @@ class Pagination {
 
   Future<Vocab> recieveVocab() async {
     //// Paginate paginate = Paginate();
-    //! Error expected: bcoz we are not waiting for the vocab async. 
+    //! Error expected: bcoz we are not waiting for the vocab async.
     Vocab vocab = await client!.getData(paginate);
+    // log(vocab.toString());      //? WORKING, data is comming
     return vocab;
 
     //   await for (var msg in client!.createStream(connect)) {
