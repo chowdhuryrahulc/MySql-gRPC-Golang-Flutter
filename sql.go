@@ -9,6 +9,17 @@ func SQLcommands (){
 	// TIMESTAMP
 
 /*
+? Shell Commands
+    \sql                            : change from js to sql queries
+    \connect root@localhost:3306    : connect to localhost
+    
+	!Error Solved: 
+	Workbench Error: 19:36:23	Could not connect, server may not be running.	Unable to connect to localhost	
+	Shell Error: MySQL Error 2003 (HY000): Can't connect to MySQL server on 'localhost:3306' (10061)
+	Sol: Ctrl+alt+del => task manager => services => search mysql80 => right click => start
+*/
+
+/*
 	show databases;                 : shows all databases available
 	create database vocab;
 	use vocab;

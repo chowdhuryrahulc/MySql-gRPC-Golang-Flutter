@@ -1,84 +1,91 @@
 package main
 
 import (
-    "fmt"
-    "database/sql"
-    _ "github.com/go-sql-driver/mysql"
+	"context"
+	"fmt"
+	"log"
+	proto "mysqlgolang/gen"
+	"net"
+	"os"
+	"sync"
+
+	_ "github.com/go-sql-driver/mysql"
+	"google.golang.org/grpc"
+	_ "google.golang.org/grpc/encoding/gzip"
+	glog "google.golang.org/grpc/grpclog"
+	prt "google.golang.org/protobuf/proto" //implements the same stuff as done by "github.com/golang/protobuf/proto"
 )
 
 /*
-? Shell Commands
-    \sql                            : change from js to sql queries
-    \connect root@localhost:3306    : connect to localhost
+
+ */
+
+var grpcLog glog.LoggerV2 
+
+func init() {
+	grpcLog = glog.NewLoggerV2(os.Stdout, os.Stdout, os.Stdout)	
+}
+
+// This struct gets all the for loop mysql data 
+type MySqlData struct {
+    id int
+    term string
+    defination string
+    favorite string     //! change to bool later
+    image []byte
+}
+
+type Server struct {
+	MySqlData []*MySqlData
+	proto.UnimplementedBroadcastServer
+}
+
+// func (s *Server) GetData(paginate *proto.Paginate) (*proto.Vocab, error) {
+// 	// wait := sync.WaitGroup{} 										// to implement go routines
+// 	// done := make(chan int)   										// to know when all the go routines are finished
+//     //todo Didnt implement size, bcoz it is recieved msg size, not send msg size
+//     // size := prt.Size(msg) 											//! gets msg size
+// 	// grpcLog.Info("SIZEEEE BROD", size)								// returns 126, 184, 291 etc with compression and without compression
+//     // for _, data := range s.MySqlData{
+// 		// wait.Add(1)
+// 		// go func(conn *Connection) {}
+//     // }
+//     return &proto.Vocab{}, nil
+// }
+
+
+func (s *Server) GetData(ctx context.Context, paginate *proto.Paginate) (*proto.Vocab, error) {
+   //! ERROR SOLVED: context is required, otherwise below in registerBroadcastServer will give an error
+   var x []MySqlData
+   x = getSqlData() 
+   return &proto.Vocab{Word: x}, nil
+
+//todo How do we change []MySqlData to []Word. 
+//todo Means os generted to grpc generated
+
+//    &proto.Vocab{Id: 3, Term: "", Defination: "", Favorite: false, Image: []byte{}}, nil
+//    x, nil
+// PROBLEM: we have to send a list, not 1 term, as done in proto file
+}
+
+func main(){
+    //todo Now send all this data via grpc
+    //todo change from incomming msg to broadcast type
+    //todo Favourite change to boolen in proto file
     
-!Error Solved: 
-    Workbench Error: 19:36:23	Could not connect, server may not be running.	Unable to connect to localhost	
-    Shell Error: MySQL Error 2003 (HY000): Can't connect to MySQL server on 'localhost:3306' (10061)
-Sol: Ctrl+alt+del => task manager => services => search mysql80 => right click => start
+    var mySqlData []*MySqlData
+	server := &Server{mySqlData, proto.UnimplementedBroadcastServer{}} //! Why did we write unimplement...?
 
-? GOLANG
-    source: https://www.geeksforgeeks.org/how-to-use-go-with-mysql/
-*/
+	grpcServer := grpc.NewServer()
+	grpcLog.Info("Starting server at port :8080")
+	proto.RegisterBroadcastServer(grpcServer, server)
+    // This server error is due to the server methord
 
-
-func main() {
-    fmt.Println("Go MySQL Tutorial")
-
-    // Open up our database connection.
-    // I've set up a database by installing mysql
-    // The database is called vocab
-    db, err := sql.Open("mysql", "root:Chowdhury0511@@tcp(127.0.0.1:3306)/vocab")
-
-    // if there is an error opening the connection, handle it
-    if err != nil {
-        panic(err.Error())
-    }
-
-    // defer the close till after the main function has finished
-    // executing
-    defer db.Close()
-
-	// perform a db.Query insert
-    // insert, err := db.Query("INSERT INTO vocabulary VALUES ( 2, 'Sinigalia', 'italy', true, LOAD_FILE('D:/Cdownloads/Flag_of_France.png') )")
-
-    // Get all values
-    getValues, err := db.Query("SELECT * FROM vocabulary")
-
-	 // if there is an error inserting, handle it
-	 if err != nil {
-        panic(err.Error())
-    }
-
-    // the result object has a method called Next,
-    // which is used to iterate through all returned rows.
-    for getValues.Next() {
-         
-        var id int
-        var term string
-        var defination string
-        var favorite bool
-        var image []byte
-         
-        // The result object provided Scan  method
-        // to read row data, Scan returns error,
-        // if any. Here we read id and name returned.
-        err = getValues.Scan(&id, &term, &defination, &favorite, &image)
-        //// get.Scan(&id, &name)
-         
-        // handle error
-        if err != nil {
-            panic(err)
-        }
-
-        fmt.Print(id)
-        fmt.Print(term)
-        fmt.Print(defination)
-        fmt.Println(favorite)
-        fmt.Println(image)
-    }
-
-    fmt.Println(getValues)
-
-    // be careful deferring Queries if you are using transactions
-    defer getValues.Close()
+    // Start the server.
+	listener, err := net.Listen("tcp", ":8080")
+	if err != nil {
+		log.Fatalf("error creating the server %v", err)
+	}
+	grpcServer.Serve(listener)
+    // fmt.Println(x)
 }

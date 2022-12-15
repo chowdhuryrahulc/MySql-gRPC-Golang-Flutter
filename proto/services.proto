@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "./gen";
+
+message Word {
+    int32 id = 1;
+    string term = 2;
+    string defination = 3;
+    bool favorite = 4;    //Change to boolean
+    bytes image = 5;
+}
+
+message Vocab {
+    repeated Word Word = 1;
+}
+
+message Paginate {}
+
+service Broadcast {
+    rpc GetData(Paginate) returns (Vocab);
+}
