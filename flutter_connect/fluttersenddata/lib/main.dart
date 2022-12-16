@@ -33,7 +33,7 @@ class PaginationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FutureBuilder<Vocab>(
+      body: FutureBuilder<List<Word>>(
           future: pagination.recieveVocab(),
           builder: (BuildContext context, AsyncSnapshot snapshot) {
             if (!snapshot.hasData) {
@@ -41,14 +41,22 @@ class PaginationPage extends StatelessWidget {
                 child: CircularProgressIndicator(),
               );
             }
+
+            log(snapshot.data.toString());
+            // log(snapshot.data[1].term.toString());
             // wordsList.add(snapshot.data);
-            log(wordsList.toString());
+            //! This is causing problems bcoz we just have 1 vocab.
+            //! We need toconvert it into list of words. And then you can access it via indexes
+            //! But how? Bcoz it is just a big huge vocab
+            // log(wordsList.toString());
             // log(snapshot.data.length.toString());
+
             return ListView.builder(
-                itemCount: 2,
+                itemCount: snapshot.data.length,
                 itemBuilder: ((context, index) {
                   return ListTile(
-                    title: Text('hero'),
+                    title: Text(snapshot.data[index].term),
+                    subtitle: Text(snapshot.data[index].defination),
                   );
                 }));
           }),

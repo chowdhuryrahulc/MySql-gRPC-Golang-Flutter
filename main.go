@@ -2,11 +2,11 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	proto "mysqlgolang/gen"
 	"net"
-	"database/sql"
 	"os"
 
 	// "sync"
@@ -24,7 +24,7 @@ import (
 ! probably we need a pagination methord toarive from client side
 ! or make something like CreteStream in TensorFlutterDocker side which can get called automatically
 todo check how they did that
- */
+*/
 
 var grpcLog glog.LoggerV2
 
@@ -62,18 +62,18 @@ type Server struct {
 func (s *Server) GetData(ctx context.Context, paginate *proto.Paginate) (*proto.Vocab, error) {
 	//! ERROR SOLVED: context is required, otherwise below in registerBroadcastServer will give an error
 	//    var x []MySqlData
-	fmt.Println("getdata1")				//? When flutter is called, this is working (it is printing)
+	fmt.Println("getdata1") //? When flutter is called, this is working (it is printing)
 	x := getSqlData()
 	fmt.Println("getdata2")
 	fmt.Println(x)
-	return &proto.Vocab{Word: x}, nil 
+	return &proto.Vocab{Word: x}, nil
 
-// 	//todo How do we change []MySqlData to []Word.
-// 	//todo Means os generted to grpc generated
+	// 	//todo How do we change []MySqlData to []Word.
+	// 	//todo Means os generted to grpc generated
 
-// 	//    &proto.Vocab{Id: 3, Term: "", Defination: "", Favorite: false, Image: []byte{}}, nil
-// 	//    x, nil
-// 	// PROBLEM: we have to send a list, not 1 term, as done in proto file
+	// 	//    &proto.Vocab{Id: 3, Term: "", Defination: "", Favorite: false, Image: []byte{}}, nil
+	// 	//    x, nil
+	// 	// PROBLEM: we have to send a list, not 1 term, as done in proto file
 }
 
 func main() {
@@ -108,6 +108,23 @@ func main() {
 }
 
 func getSqlData() []*proto.Word {
+	//? *[]Users would be a pointer to a slice of Users
+	//? []*Users would be a slice of pointers to Users.
+	//! Problem is all the pointers are pointing to the same memory address. That is dataRow.
+	//! Thats why all the values are same
+	// SOL: make many dataRows. Like a slice or array. And each pointer to be returned can
+	// point to different slice (1,2,3,4...)
+	//		! Error encountered: didnt know the meaning of &, and at the for loop entry, we got error
+	// 		! Also the for loop i gave an error. So use it as a seperate experiment. 
+	// 		How to get i value from a .Next() loop
+	// SOL2: mysqlAllData is not a slice of pointers, rather a ... 
+	// Problem: we have to return a slice of pointers. 
+	// todo WTF is &, or reference?????
+	// & = 0xc0000160c0
+
+
+
+
 	//! Error Solved: panic: runtime error: invalid memory address or nil pointer dereference
 	// SOL: change var r * Rectangle to
 	// 	1) r := &Rectangle{l:10, b:20}
@@ -115,7 +132,16 @@ func getSqlData() []*proto.Word {
 	// 	3) r := new(Rectangle)
 	// (where Rectangle is a struct with l and b variables and some methords)
 
-	dataRow := &proto.Word{}
+	dataRow := proto.Word{}
+
+	//**************************************TESTING***************************************
+	dataRowArray := []proto.Word{}			//! DELETE LATER
+	dataRowArray[0] = proto.Word{Id:3, Term:"pattaya", Defination:"thailand",  Favorite:true}
+	// What we need is to put all this in a scan function. An get a response
+
+	//**************************************TESTING***************************************
+
+	// x := make([]proto.Word{}, 0)
 	mysqlAllData := []*proto.Word{}
 
 	// Open up our database connection.
@@ -136,6 +162,7 @@ func getSqlData() []*proto.Word {
 
 	// Get all values
 	getValues, err := db.Query("SELECT * FROM vocabulary")
+	// fmt.Println(getValues)// &{0xc0000d6090 0x115b5a0 0xc0000a40f0 <nil> <nil> {{0 0} 0 0 0 0} false <nil> []}
 
 	// if there is an error inserting, handle it
 	if err != nil {
@@ -144,6 +171,10 @@ func getSqlData() []*proto.Word {
 
 	// the result object has a method called Next,
 	// which is used to iterate through all returned rows.
+	
+		//// for i := 0; getValues.Next(); i++ {
+		//// fmt.Println("ERRORRRRRR")
+		//// }
 	for getValues.Next() {
 		// The result object provided Scan  method
 		// to read row data, Scan returns error,
@@ -151,10 +182,14 @@ func getSqlData() []*proto.Word {
 		errr := getValues.Scan(&dataRow.Id, &dataRow.Term, &dataRow.Defination, &dataRow.Favorite, &dataRow.Image)
 
 		if errr != nil {
-			panic(err)
+			fmt.Println(err)
+			// panic(err)
 		}
 
-		mysqlAllData = append(mysqlAllData, dataRow)
+		fmt.Println("SQLLL")
+		fmt.Println(&dataRow) // All values in loop are comming
+		fmt.Println(mysqlAllData)
+		mysqlAllData = append(mysqlAllData, &dataRow) //! ERROR OCCURING due to pointers append
 	}
 
 	// be careful deferring Queries if you are using transactions

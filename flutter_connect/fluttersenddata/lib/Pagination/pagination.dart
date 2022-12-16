@@ -19,12 +19,13 @@ class Pagination {
         )));
   }
 
-  Future<Vocab> recieveVocab() async {
+  Future<List<Word>> recieveVocab() async {
     //// Paginate paginate = Paginate();
     //! Error expected: bcoz we are not waiting for the vocab async.
     Vocab vocab = await client!.getData(paginate);
-    // log(vocab.toString());      //? WORKING, data is comming
-    return vocab;
+    log(vocab.toString());      //? WORKING, data is comming
+    return vocab.word.toList();
+    // vocab;
 
     //   await for (var msg in client!.createStream(connect)) {
     //     // client!.createStream(connect) is the 2nd rpc function.
