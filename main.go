@@ -65,7 +65,7 @@ func (s *Server) GetData(ctx context.Context, paginate *proto.Paginate) (*proto.
 	fmt.Println("getdata1") //? When flutter is called, this is working (it is printing)
 	x := getSqlData()
 	fmt.Println("getdata2")
-	fmt.Println(x)
+	// fmt.Println(x)
 	return &proto.Vocab{Word: x}, nil
 
 	// 	//todo How do we change []MySqlData to []Word.
@@ -115,15 +115,12 @@ func getSqlData() []*proto.Word {
 	// SOL: make many dataRows. Like a slice or array. And each pointer to be returned can
 	// point to different slice (1,2,3,4...)
 	//		! Error encountered: didnt know the meaning of &, and at the for loop entry, we got error
-	// 		! Also the for loop i gave an error. So use it as a seperate experiment. 
+	// 		! Also the for loop i gave an error. So use it as a seperate experiment.
 	// 		How to get i value from a .Next() loop
-	// SOL2: mysqlAllData is not a slice of pointers, rather a ... 
-	// Problem: we have to return a slice of pointers. 
+	// SOL2: mysqlAllData is not a slice of pointers, rather a ...
+	// Problem: we have to return a slice of pointers.
 	// todo WTF is &, or reference?????
 	// & = 0xc0000160c0
-
-
-
 
 	//! Error Solved: panic: runtime error: invalid memory address or nil pointer dereference
 	// SOL: change var r * Rectangle to
@@ -132,13 +129,19 @@ func getSqlData() []*proto.Word {
 	// 	3) r := new(Rectangle)
 	// (where Rectangle is a struct with l and b variables and some methords)
 
-	dataRow := proto.Word{}
+	// dataRow := proto.Word{}	//! satish
 
 	//**************************************TESTING***************************************
-	dataRowArray := []proto.Word{}			//! DELETE LATER
-	dataRowArray[0] = proto.Word{Id:3, Term:"pattaya", Defination:"thailand",  Favorite:true}
+	// dataRowArray := new([]proto.Word)			//! DELETE LATER
+	// dataRowArray = append(dataRowArray, proto.Word{Id:3, Term:"pattaya", Defination:"thailand",  Favorite:true, Image: []byte{1, 8, 90, 44, 63, 77, 90}})
+	// fmt.Println(dataRowArray)
 	// What we need is to put all this in a scan function. An get a response
-
+	//! Even this code throws error
+	// Hypothesis1: Probably bcoz o empty image value, it causes error. So give a fake image byte value
+	// 	(DIDNT WORK), we tried adding image value as []byte{1, 8, 90, 44, 63, 77, 90}
+	// Real Error: panic: runtime error: index out of range [0] with length 0
+	// Means range error while adding values to the dataRowArray[0]
+	//
 	//**************************************TESTING***************************************
 
 	// x := make([]proto.Word{}, 0)
@@ -171,11 +174,13 @@ func getSqlData() []*proto.Word {
 
 	// the result object has a method called Next,
 	// which is used to iterate through all returned rows.
-	
-		//// for i := 0; getValues.Next(); i++ {
-		//// fmt.Println("ERRORRRRRR")
-		//// }
+
+	//// for i := 0; getValues.Next(); i++ {
+	//// fmt.Println("ERRORRRRRR")
+	//// }
 	for getValues.Next() {
+		dataRow := proto.Word{} //! SATISH
+
 		// The result object provided Scan  method
 		// to read row data, Scan returns error,
 		// if any. Here we read id and name returned.
@@ -186,10 +191,14 @@ func getSqlData() []*proto.Word {
 			// panic(err)
 		}
 
+		//todo Wat you can do, is put all into a .....
+		//todo Why cant it happen? Why cant array go and get the value, and append it into mysqlAllData?
+		//todo Is just the dataRowArray[1] giving error?
+
 		fmt.Println("SQLLL")
-		fmt.Println(&dataRow) // All values in loop are comming
-		fmt.Println(mysqlAllData)
+		fmt.Println(&dataRow)                         // All values in loop are comming
 		mysqlAllData = append(mysqlAllData, &dataRow) //! ERROR OCCURING due to pointers append
+		fmt.Println(mysqlAllData)
 	}
 
 	// be careful deferring Queries if you are using transactions
@@ -197,3 +206,30 @@ func getSqlData() []*proto.Word {
 
 	return mysqlAllData
 }
+
+// func getSqlDataRetry() []*proto.Word {
+// 	dataRow := proto.Word{}
+// 	mysqlAllData := []*proto.Word{}
+// 	db, err := sql.Open("mysql", "root:Chowdhury0511@@tcp(127.0.0.1:3306)/vocab")
+// 	if err != nil {
+// 		panic(err.Error())
+// 	}
+// 	defer db.Close()
+// 	getValues, err := db.Query("SELECT * FROM vocabulary")
+// 	if err != nil {
+// 		panic(err.Error())
+// 	}
+// 	for getValues.Next() {
+// 		errr := getValues.Scan(&dataRow.Id, &dataRow.Term, &dataRow.Defination, &dataRow.Favorite, &dataRow.Image)
+// 		if errr != nil {
+// 			fmt.Println(err)
+// 		}
+// 		fmt.Println("SQLLL")
+// 		fmt.Println(&dataRow)                         // All values in loop are comming
+// 		mysqlAllData = append(mysqlAllData, &dataRow) //! ERROR OCCURING due to pointers append
+// 		fmt.Println(mysqlAllData)
+// 	}
+// 	defer getValues.Close()
+
+// 	return mysqlAllData
+// }
