@@ -13,6 +13,14 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+// todo PAGINATION:
+//todo  send limited amount from golang to flutter, lets say 4
+//todo  then user presses a button, pagination function again gets called 
+//todo  and the next 4 gets in
+
+//todo So button push, 4, then button push, next 4 (and it push out 4, which then added to flutter frontend list). Sort via id?
+//todo but will itbe useful. Bcoz we need pagination in DynmoDb. Not MySql at the very least (DONT DO FOR MYSQL)
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

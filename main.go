@@ -9,8 +9,6 @@ import (
 	"net"
 	"os"
 
-	// "sync"
-
 	_ "github.com/go-sql-driver/mysql"
 	"google.golang.org/grpc"
 	_ "google.golang.org/grpc/encoding/gzip"
@@ -32,64 +30,22 @@ func init() {
 	grpcLog = glog.NewLoggerV2(os.Stdout, os.Stdout, os.Stdout)
 }
 
-// This struct gets all the for loop mysql data
-// type MySqlData struct {
-//     id int
-//     term string
-//     defination string
-//     favorite string     //! change to bool later
-//     image []byte
-// }
-
 type Server struct {
 	MySqlData []*proto.Word
 	proto.UnimplementedBroadcastServer
 }
 
-// func (s *Server) GetData(paginate *proto.Paginate) (*proto.Vocab, error) {
-// 	// wait := sync.WaitGroup{} 										// to implement go routines
-// 	// done := make(chan int)   										// to know when all the go routines are finished
-//     //todo Didnt implement size, bcoz it is recieved msg size, not send msg size
-//     // size := prt.Size(msg) 											//! gets msg size
-// 	// grpcLog.Info("SIZEEEE BROD", size)								// returns 126, 184, 291 etc with compression and without compression
-//     // for _, data := range s.MySqlData{
-// 		// wait.Add(1)
-// 		// go func(conn *Connection) {}
-//     // }
-//     return &proto.Vocab{}, nil
-// }
-
 func (s *Server) GetData(ctx context.Context, paginate *proto.Paginate) (*proto.Vocab, error) {
 	//! ERROR SOLVED: context is required, otherwise below in registerBroadcastServer will give an error
-	//    var x []MySqlData
-	fmt.Println("getdata1") //? When flutter is called, this is working (it is printing)
+
+	// todo 
 	x := getSqlData()
-	fmt.Println("getdata2")
-	// fmt.Println(x)
 	return &proto.Vocab{Word: x}, nil
-
-	// 	//todo How do we change []MySqlData to []Word.
-	// 	//todo Means os generted to grpc generated
-
-	// 	//    &proto.Vocab{Id: 3, Term: "", Defination: "", Favorite: false, Image: []byte{}}, nil
-	// 	//    x, nil
-	// 	// PROBLEM: we have to send a list, not 1 term, as done in proto file
 }
 
 func main() {
-	//todo Now send all this data via grpc
 	//todo change from incomming msg to broadcast type
-	//// Favourite change to boolen in proto file
 
-	//! testing sql function
-	// getSqlData() //! error1: cant import from other file, bcoz it shows error
-
-	// fmt.Println("exeo")
-	// x := getSqlData()
-	// fmt.Println("goexeo")
-	// fmt.Println("x value", x)
-
-	//// uncomment below all
 	var mySqlData []*proto.Word
 	server := &Server{mySqlData, proto.UnimplementedBroadcastServer{}} //! Why did we write unimplement...?
 
@@ -104,7 +60,6 @@ func main() {
 		log.Fatalf("error creating the server %v", err)
 	}
 	grpcServer.Serve(listener)
-	// fmt.Println(x)
 }
 
 func getSqlData() []*proto.Word {
@@ -131,20 +86,6 @@ func getSqlData() []*proto.Word {
 
 	// dataRow := proto.Word{}	//! satish
 
-	//**************************************TESTING***************************************
-	// dataRowArray := new([]proto.Word)			//! DELETE LATER
-	// dataRowArray = append(dataRowArray, proto.Word{Id:3, Term:"pattaya", Defination:"thailand",  Favorite:true, Image: []byte{1, 8, 90, 44, 63, 77, 90}})
-	// fmt.Println(dataRowArray)
-	// What we need is to put all this in a scan function. An get a response
-	//! Even this code throws error
-	// Hypothesis1: Probably bcoz o empty image value, it causes error. So give a fake image byte value
-	// 	(DIDNT WORK), we tried adding image value as []byte{1, 8, 90, 44, 63, 77, 90}
-	// Real Error: panic: runtime error: index out of range [0] with length 0
-	// Means range error while adding values to the dataRowArray[0]
-	//
-	//**************************************TESTING***************************************
-
-	// x := make([]proto.Word{}, 0)
 	mysqlAllData := []*proto.Word{}
 
 	// Open up our database connection.
@@ -175,9 +116,6 @@ func getSqlData() []*proto.Word {
 	// the result object has a method called Next,
 	// which is used to iterate through all returned rows.
 
-	//// for i := 0; getValues.Next(); i++ {
-	//// fmt.Println("ERRORRRRRR")
-	//// }
 	for getValues.Next() {
 		dataRow := proto.Word{} //! SATISH
 
@@ -191,13 +129,9 @@ func getSqlData() []*proto.Word {
 			// panic(err)
 		}
 
-		//todo Wat you can do, is put all into a .....
-		//todo Why cant it happen? Why cant array go and get the value, and append it into mysqlAllData?
-		//todo Is just the dataRowArray[1] giving error?
-
 		fmt.Println("SQLLL")
 		fmt.Println(&dataRow)                         // All values in loop are comming
-		mysqlAllData = append(mysqlAllData, &dataRow) //! ERROR OCCURING due to pointers append
+		mysqlAllData = append(mysqlAllData, &dataRow) //// ERROR OCCURING due to pointers append
 		fmt.Println(mysqlAllData)
 	}
 
@@ -206,30 +140,3 @@ func getSqlData() []*proto.Word {
 
 	return mysqlAllData
 }
-
-// func getSqlDataRetry() []*proto.Word {
-// 	dataRow := proto.Word{}
-// 	mysqlAllData := []*proto.Word{}
-// 	db, err := sql.Open("mysql", "root:Chowdhury0511@@tcp(127.0.0.1:3306)/vocab")
-// 	if err != nil {
-// 		panic(err.Error())
-// 	}
-// 	defer db.Close()
-// 	getValues, err := db.Query("SELECT * FROM vocabulary")
-// 	if err != nil {
-// 		panic(err.Error())
-// 	}
-// 	for getValues.Next() {
-// 		errr := getValues.Scan(&dataRow.Id, &dataRow.Term, &dataRow.Defination, &dataRow.Favorite, &dataRow.Image)
-// 		if errr != nil {
-// 			fmt.Println(err)
-// 		}
-// 		fmt.Println("SQLLL")
-// 		fmt.Println(&dataRow)                         // All values in loop are comming
-// 		mysqlAllData = append(mysqlAllData, &dataRow) //! ERROR OCCURING due to pointers append
-// 		fmt.Println(mysqlAllData)
-// 	}
-// 	defer getValues.Close()
-
-// 	return mysqlAllData
-// }

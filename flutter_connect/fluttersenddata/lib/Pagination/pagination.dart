@@ -1,7 +1,5 @@
 // ignore_for_file: prefer_const_constructors
 
-import 'dart:developer';
-
 import 'package:grpc/grpc.dart';
 import '../gen/services.pbgrpc.dart';
 
@@ -20,17 +18,7 @@ class Pagination {
   }
 
   Future<List<Word>> recieveVocab() async {
-    //// Paginate paginate = Paginate();
-    //! Error expected: bcoz we are not waiting for the vocab async.
-    Vocab vocab = await client!.getData(paginate);
-    log(vocab.toString());      //? WORKING, data is comming
+    Vocab vocab = await client!.getData(paginate); // await worked, not went ahead without implementing this
     return vocab.word.toList();
-    // vocab;
-
-    //   await for (var msg in client!.createStream(connect)) {
-    //     // client!.createStream(connect) is the 2nd rpc function.
-    //     // Takes connect, returns stream of messages
-    //     yield msg;
-    //   }
   }
 }

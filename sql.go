@@ -20,7 +20,7 @@ func SQLcommands (){
 */
 
 /*
-	show databases;                 : shows all databases available
+	show databases;                 		: shows all databases available
 	create database vocab;
 	use vocab;
 	show tables;
@@ -41,13 +41,25 @@ func SQLcommands (){
 	);
 	Cant store Lists (for lists, use foreign key references)
 	drop table persons;
-	show columns from vocab;			: show all column names (table structure) in a table
+	show columns from vocabulary;			: show all column names (table structure) in a table
+	desc vocabulary;						: same as show columns
 	1) ALTER TABLE Vocabulary ALTER defination SET DEFAULT 'defcon6';
 	2) ALTER TABLE Vocabulary ALTER defination DROP DEFAULT;
 	Error: cannot alter autoincrement default
-	SELECT * FROM vocabulary;			: see all contants of table (vocabulary)
-	!ERROR: (DIDNT WORK) INSERT INTO vocabulary VALUES ('Osaka', 'japan', true, LOAD_FILE('D:/Cdownloads/Flag_of_France.png');
-
+	
+	? Queries
+	1) SELECT * FROM vocabulary;			: see all contants of table (vocabulary)
+	2) 
+	3) 
+	4) 
+	5) 
+	6) 
+	7) 
+	
+	INSERT: insert into vocabulary values (6, 'paris', 'france', false, load_file('D:/Cdownloads/Flag_of_France.png'));
+	!Error solved: in insert, use 'single quotes', not double quotes. Also in image, use single quotes
+	!Error2: you need to give id in insert
+	
 
 CREATE TABLE vocab (id INTEGER PRIMARY KEY AUTOINCREMENT, term TEXT, defination TEXT, example TEXT, url TEXT, favorite BOOLEAN, archive BOOLEAN, current_set TEXT, picture BLOB)");
 ! Error: primary key autoincrement doesnt work in mysql shell
