@@ -23,6 +23,7 @@ func SQLcommands (){
 	show databases;                 		: shows all databases available
 	create database vocab;
 	use vocab;
+	drop database xyz;						: delete database
 	show tables;
 	1) create table holla(id integer, term text);
 	2) CREATE TABLE Persons (
